@@ -132,6 +132,8 @@ def getSources (name) { dir(name) {
     // Pull Request and has to checkout PR branch instead of master branch
     // for relevant repository:
     def regex = /https:\/\/github.com\/[^\/]+\/([^\/]+)\/pull\/(\d+)/
+    sh "echo ${env.CHANGE_URL}"
+    sh "echo ${env.CHANGE_TARGET}"
     def match = (env.CHANGE_URL =~ regex)
     if (match) {
         pr_repo = match[0][1]
