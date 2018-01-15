@@ -34,7 +34,7 @@ def clone (repo_url, git_ref = "master") {
         method hudson.plugins.git.GitSCMBackwardCompatibility getExtensions
         method hudson.plugins.git.GitSCM getUserRemoteConfigs
  **/
-def cloneUpstream () {
+def cloneTestee () {
     checkout(scm: [
         $class: 'GitSCM',
         branches: scm.branches,
@@ -126,25 +126,11 @@ def retryOnPreemption (action, times = 1) {
 *******************************************************************************/
 
 def getSources (name) { dir(name) {
-    def pr_repo
 
-    // presence of CHANGE_URL environment variable means this pipeline tests
-    // Pull Request and has to checkout PR branch instead of master branch
-    // for relevant repository:
-    def regex = /https:\/\/github.com\/[^\/]+\/([^\/]+)\/pull\/(\d+)/
-    echo env.CHANGE_URL
-    echo env.CHANGE_TARGET
-    echo scm.key
-    def match = (env.CHANGE_URL =~ regex)
-    if (match) {
-        pr_repo = match[0][1]
-    }
-    match = null // need to null match to avoid NotSerializableException
-
-    if (pr_repo == name) {
-        cloneUpstream()
-    }
-    else {
+    echo scm.repositories[0].name
+    if (scm.getRepositoryByName(name)) {
+        cloneTestee()
+    } else {
         // Checkout matching branches of other repos, either
         // target branch for PRs or identical branch name.
         def base_branch = env.CHANGE_TARGET ?: env.BRANCH_NAME
