@@ -52,6 +52,13 @@ lxd_containers
 [gce_hosts:children]
 jenkins_gce_slaves
 
+# running at Hetzner
+[hcloud:children]
+nbg1
+
+[hcloud:vars]
+ansible_ssh_user=dawg
+
 # all non-containerized host
 [servers:children]
 lxd_hosts

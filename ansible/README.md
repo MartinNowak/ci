@@ -18,7 +18,7 @@
 
 ### Passwords
 
-For less typing store vault, sudo, and profitbricks passwords in [Pass: The Standard Unix Password Manager](https://www.passwordstore.org/).
+For less typing store vault, and sudo passwords in [Pass: The Standard Unix Password Manager](https://www.passwordstore.org/).
 ```sh
 pass add dlangci/ansible_vault
 pass add dlangci/sudo
@@ -29,6 +29,16 @@ git config diff.ansible-vault.textconv 'ansible-vault view --vault-password-file
 ```
 Alternatively comment out `vault_password_file` in [ansible.cfg](ansible.cfg) and `ansible_become_pass` in [group_vars/all](group_vars/all)
 and pass `-K, --ask-become-pass` and `--ask-vault-pass` to `ansible-playbook`.
+
+Furthermore a GCE account is needed to create gce instances ([gce.yml](/gce.yml)).
+```sh
+pass add gcloud/ansible@dlang-ci.iam.gserviceaccount.com -m < dlang\ CI-1234567890ab.json
+```
+
+[Hetzner ansible plugin](https://github.com/thetechnick/hcloud-ansible/releases/latest) binaries are needed under `./library` to prepare hcloud instance images ([hcloud.yml](/hcloud.yml)). A Hetzner Cloud token is expected in the password store.
+```sh
+pass add dlangci/hcloud
+```
 
 ### Caches
 
