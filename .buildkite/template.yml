@@ -3,6 +3,6 @@ description: A template to test dlang repository
 steps:
   - command: >-
       mkdir -p .buildkite &&
-      wget -O .buildkite/pipeline.yml https://raw.githubusercontent.com/dlang-test/ci/master/pipeline.yml &&
+      wget -O .buildkite/pipeline.yml https://raw.githubusercontent.com/MartinNowak/ci/buildkite/pipeline.yml &&
       buildkite-agent pipeline upload
     label: :pipeline: ci@master
