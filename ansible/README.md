@@ -41,6 +41,15 @@ and pass `-K, --ask-become-pass` and `--ask-vault-pass` to `ansible-playbook`.
 
 - remove host facts caches under .cache/ in case major properties (e.g. IP address, hostname) change
 
+### Prepare New Servers
+
+- `ssh-copy-id eu.code.dlang.io`
+- `ssh-copy-id na.code.dlang.io`
+- `ssh-copy-id as.code.dlang.io`
+- `ansible -m raw -a 'apt-get update -q=2' dub_hosts`
+- `ansible -m raw -a 'apt-get install --no-install-recommends python-minimal python-apt -q=2' dub_hosts`
+- `ansible -m ping dub_hosts`
+
 ## [Vagrant](https://www.vagrantup.com/) to setup local VirtualBox (Jenkins on http://172.16.1.2)
 
 - [Download - Vagrant](https://www.vagrantup.com/downloads.html)

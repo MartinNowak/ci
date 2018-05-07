@@ -36,9 +36,16 @@ buildkite-agent-[01:08].ci.lxd
 lxd_hosts
 lxd_containers
 
+# dub-registry hosts
+[dub_hosts]
+eu.code.dlang.io ansible_ssh_host=138.201.191.166
+na.code.dlang.io ansible_ssh_host=192.138.210.113
+as.code.dlang.io ansible_ssh_host=139.99.42.12
+
 # all non-containerized host
 [servers:children]
 lxd_hosts
+dub_hosts
 
 # admin setting
 [servers:vars]

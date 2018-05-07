@@ -1,0 +1,4 @@
+---
+- hosts: dub_hosts
+  roles:
+    - common

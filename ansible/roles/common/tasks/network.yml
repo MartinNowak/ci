@@ -1,0 +1,13 @@
+---
+- name: configure netplan
+  copy:
+    dest: /etc/netplan/01-netcfg.yaml
+    content: |
+      network:
+        version: 2
+        renderer: networkd
+        ethernets:
+          {{ netplan_ethernets | indent(4) }}
+  when: ansible_distribution_major_version | int >= 18 and netplan_ethernets is defined
+  notify: netplan apply
+- meta: flush_handlers

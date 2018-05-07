@@ -1,6 +1,8 @@
 ---
 - name: update apt cache
   apt: { update_cache: yes, cache_valid_time: 3600 }
+- include: network.yml
+  tags: network
 - include: hostname.yml
 - include: journald.yml
 - include: sshd.yml
