@@ -5,6 +5,8 @@
   tags: network
 - include: hostname.yml
   tags: hostname
+- include: resolv.yml
+  tags: resolv
 - include: journald.yml
 - include: sshd.yml
 # TODO: firewall on containers?

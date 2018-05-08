@@ -1,4 +1,5 @@
 ---
+coordinates: 32.8,-96.8
 netplan_ethernets: |
   ens3:
     match:
@@ -8,10 +9,3 @@ netplan_ethernets: |
     addresses:
       - 2604:880:52:a9f::1/48
     gateway6: 2604:880:52::1
-    nameservers:
-      search:
-        - code.dlang.io
-      addresses:
-        - 1.1.1.1
-        - 8.8.8.8
-        - 2606:4700:4700::1001

@@ -2,3 +2,9 @@
 - hosts: dub_hosts
   roles:
     - common
+    - name: gdnsd
+      tags: gdnsd
+      plugins:
+        geoip: "{{ lookup('template', 'code.dlang.io.geoip.j2') }}"
+      zones:
+        code.dlang.io: "{{ lookup('template', 'code.dlang.io.zone.j2') }}"

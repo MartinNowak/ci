@@ -1,0 +1,28 @@
+$ORIGIN code.dlang.io.
+$TTL 1800
+
+@       IN      SOA     ns1        hostmaster.dawg.eu. (
+                        2018050802 ; serial
+                        3600 ; refresh
+                        900 ; retry
+                        1209600 ; expire
+                        1800 ; negative_ttl
+                        )
+
+@ NS ns1
+@ NS ns2
+@ NS ns3
+ns1 A {{ hostvars['eu.code.dlang.io'].ansible_default_ipv4.address }}
+    AAAA {{ hostvars['eu.code.dlang.io'].ansible_default_ipv6.address }}
+ns2 A {{ hostvars['na.code.dlang.io'].ansible_default_ipv4.address }}
+    AAAA {{ hostvars['na.code.dlang.io'].ansible_default_ipv6.address }}
+ns3 A {{ hostvars['as.code.dlang.io'].ansible_default_ipv4.address }}
+    AAAA {{ hostvars['as.code.dlang.io'].ansible_default_ipv6.address }}
+eu A {{ hostvars['eu.code.dlang.io'].ansible_default_ipv4.address }}
+   AAAA {{ hostvars['eu.code.dlang.io'].ansible_default_ipv6.address }}
+na A {{ hostvars['na.code.dlang.io'].ansible_default_ipv4.address }}
+   AAAA {{ hostvars['na.code.dlang.io'].ansible_default_ipv6.address }}
+as A {{ hostvars['as.code.dlang.io'].ansible_default_ipv4.address }}
+   AAAA {{ hostvars['as.code.dlang.io'].ansible_default_ipv6.address }}
+@ 10 DYNA geoip!dub_prod
+reflect 10 DYNA reflect

@@ -1,0 +1,29 @@
+maps => {
+  auto_map => {
+    geoip_db => /usr/share/GeoIP/GeoLiteCityv6.dat,
+    datacenters => [
+    {%- for host in groups.dub_hosts -%}
+    {{ hostvars[host].inventory_hostname_short }},
+    {%- endfor -%}
+    ],
+    auto_dc_coords => {
+       {% for host in groups.dub_hosts -%}
+       {{ hostvars[host].inventory_hostname_short }} => [ {{ hostvars[host].coordinates }} ],
+       {% endfor -%}
+    }
+  },
+},
+resources => {
+  dub_prod => {
+    map => auto_map,
+    service_types => tcp443,
+    dcmap => {
+       {% for host in groups.dub_hosts -%}
+       {{ hostvars[host].inventory_hostname_short }} => {
+         addrs_v4 => [{{ hostvars[host].ansible_default_ipv4.address }}],
+         addrs_v6 => [{{ hostvars[host].ansible_default_ipv6.address }}],
+       }
+       {% endfor -%}
+    }
+  }
+},

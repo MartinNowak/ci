@@ -1,0 +1,13 @@
+---
+- name: uninstall resolvconf
+  apt: { name: resolvconf, state: absent }
+- name: disable systemd-resolved
+  service: { name: systemd-resolved, enabled: no, state: stopped }
+  when: ansible_distribution_major_version >= 17
+- name: configure resolv.conf
+  copy:
+    dest: /etc/resolv.conf
+    content: |
+      nameserver 1.1.1.1
+      nameserver 8.8.8.8
+      nameserver 2606:4700:4700::1001

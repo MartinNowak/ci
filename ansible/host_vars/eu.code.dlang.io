@@ -1,4 +1,5 @@
 ---
+coordinates: 50.5,12.3
 netplan_ethernets: |
   ens3:
     match:
@@ -8,10 +9,3 @@ netplan_ethernets: |
     addresses:
       - 2a01:4f8:1c17:61c2::1/64
     gateway6: fe80::1
-    nameservers:
-      search:
-        - code.dlang.io
-      addresses:
-        - 1.1.1.1
-        - 8.8.8.8
-        - 2606:4700:4700::1001

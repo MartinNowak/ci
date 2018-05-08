@@ -1,0 +1,37 @@
+---
+- name: install gdnsd
+  apt: { name: "{{ item }}", install_recommends: no, update_cache: yes, cache_valid_time: 3600 }
+  with_items: [gdnsd, geoip-database-contrib]
+- name: configure gdnsd
+  copy:
+    dest: /etc/gdnsd/config
+    content: |
+      service_types => {
+        tcp443 => {
+          plugin => tcp_connect,
+          port => 443, # required
+          up_thresh => 6,
+          ok_thresh => 3,
+          down_thresh => 3,
+          interval => 5,
+        }
+      }
+      plugins => {
+        reflect => {},
+        {% for plugin, config in plugins.iteritems() -%}
+        {{ plugin }} => {
+          {{ config | indent(4) }}
+        }
+        {% endfor %}
+      }
+  notify: restart gdnsd
+- name: configure gdnsd zones
+  copy:
+    dest: "/etc/gdnsd/zones/{{ item.key }}"
+    content: "{{ item.value }}"
+  with_dict: "{{ zones }}"
+- name: enable gdnsd
+  service: { name: gdnsd, enabled: yes }
+- name: allow dns traffic
+  ufw: { rule: allow, port: 53 }
+  tags: ufw
