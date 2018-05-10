@@ -11,6 +11,7 @@
   tags: resolv
 - include: journald.yml
 - include: sshd.yml
+  tags: sshd
 # TODO: firewall on containers?
 - include: firewall.yml
 - include: mta.yml
