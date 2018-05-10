@@ -2,6 +2,7 @@
 # setup haproxy and letsencrypt certificates
 - name: add haproxy-1.8 repo
   apt_repository: { repo: 'ppa:vbernat/haproxy-1.8', update_cache: yes }
+  when: ansible_distribution_major_version | int < 18
 - name: install haproxy
   apt: { name: haproxy=1.8.*, install_recommends: no, update_cache: yes, cache_valid_time: 3600 }
 
@@ -17,7 +18,14 @@
               redirect scheme https code 301 if !acme
               use_backend acme if acme
       backend acme # for renewing letencrypt challenges
-              server s1 127.0.0.1:23878
+              {% if acme_servers | length > 1 -%}
+              {% for server in acme_servers -%}
+              {# challenged server depends on geo-dns resolution -#}
+              server s{{ loop.index }} {{ server }}:{{ http_challenge_port }} check inter 500ms rise 1
+              {% endfor %}
+              {% else -%}
+              server s1 {{ acme_servers[0] }}:{{ http_challenge_port }}
+              {% endif %}
   when: ansible_virtualization_type != 'virtualbox'
   notify: restart haproxy
 
@@ -26,12 +34,14 @@
 - name: allow http and https on firewall
   ufw: { rule: allow, port: "{{ item }}", proto: tcp }
   with_items: [http, https]
+- name: allow acme http requests
+  ufw: { rule: allow, port: "{{ http_challenge_port }}", proto: tcp }
+  when: acme_servers | length > 1
 
 - include: obtain_cert.yml
   vars:
     email: webmaster@dawg.eu
-    domains: "{{ backends }}"
-    http_challenge_port: 23878
+    domains: "{{ backends | map(attribute='domain') | list }}"
     reload_cmd: systemctl reload haproxy
   when: ansible_virtualization_type != 'virtualbox'
 
@@ -48,17 +58,17 @@
     block: |
       frontend https
               mode http
-              bind :::443 ssl {%- for domain in backends.keys() %} crt /etc/ssl/private/{{ domain }}.pem{%- endfor %} alpn h2,http/1.1
+              bind :::443 ssl {%- for b in backends %} crt /etc/ssl/private/{{ b.domain }}.pem{%- endfor %} alpn h2,http/1.1
 
               http-request set-header X-Forwarded-Proto https
               http-response set-header Strict-Transport-Security max-age=31536000
-              {% for domain in backends.keys() -%}
-              use_backend {{ domain }} if { ssl_fc_sni -i {{ domain }} }
+              {% for b in backends -%}
+              use_backend {{ b.domain }} if { ssl_fc_sni -i {{ b.domain }} }
               {% endfor %}
 
-      {% for domain, backend in backends.iteritems() -%}
-      backend {{ domain }}
-              {{ backend | indent(8) }}
+      {% for b in backends -%}
+      backend {{ b.domain }}
+              {{ b.config | indent(8) }}
       {% endfor %}
   when: ansible_virtualization_type != 'virtualbox'
   notify: restart haproxy

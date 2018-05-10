@@ -156,9 +156,11 @@
     - role: haproxy
       tags: haproxy
       backends:
-        ci.dlang.io: |
-          mode http
-          server s1 jenkins.ci.lxd:8080
-        code-mirror.dlang.io: |
-          mode http
-          server s1 dub-registry.ci.lxd:8005
+        - domain: ci.dlang.io
+          config: |
+            mode http
+            server s1 jenkins.ci.lxd:8080
+        - domain: code-mirror.dlang.io
+          config: |
+            mode http
+            server s1 dub-registry.ci.lxd:8005

@@ -7,7 +7,9 @@
     rsa-key-size: 4096
     email: "{{ email }}"
     authenticator: standalone
+    # deprecated with 0.9.0
     standalone-supported-challenges: http-01
+    preferred-challenges: http
     http-01-port: "{{ http_challenge_port }}"
 - name: stat certificates
   stat: { path: "/etc/letsencrypt/live/{{item}}" }
@@ -16,6 +18,7 @@
 - name: get initial certificate
   command: letsencrypt certonly --standalone -d {{item.item}} --email {{email}} --non-interactive --agree-tos
   with_items: "{{ cert_stats.results }}"
+  serial: 1 # TODO: serial not available for roles
   when: not item.stat.exists
 - name: stat combined pem
   stat: path=/etc/ssl/private/{{item}}.pem
@@ -51,7 +54,9 @@
 - name: cron for renewal
   cron:
     name: letsencrypt
-    special_time: weekly
+    weekday: 1
+    hour: 9
+    minute: "{{ 60 | random(seed=inventory_hostname) }}"
     cron_file: letsencrypt_renew
     user: root
     job: /root/letsencrypt_renew.sh

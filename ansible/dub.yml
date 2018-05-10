@@ -8,3 +8,15 @@
         geoip: "{{ lookup('template', 'code.dlang.io.geoip.j2') }}"
       zones:
         code.dlang.io: "{{ lookup('template', 'code.dlang.io.zone.j2') }}"
+    - name: haproxy
+      tags: haproxy
+      acme_servers: "{{ groups.dub_hosts | map('extract', hostvars) | map(attribute='ansible_default_ipv4.address') | list }}"
+      backends:
+        - domain: "{{ inventory_hostname_short }}.code.dlang.io"
+          config: |
+            mode http
+            redirect prefix https://code.dlang.org
+        - domain: code.dlang.io
+          config: |
+            mode http
+            redirect prefix https://code.dlang.org
