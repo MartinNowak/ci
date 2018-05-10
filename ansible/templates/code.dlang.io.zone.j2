@@ -1,8 +1,8 @@
 $ORIGIN code.dlang.io.
 $TTL 1800
 
-@       IN      SOA     ns1        hostmaster.dawg.eu. (
-                        2018050802 ; serial
+@       IN      SOA     ns1        webmaster.dawg.eu. (
+                        2018051001 ; serial
                         3600 ; refresh
                         900 ; retry
                         1209600 ; expire
@@ -18,6 +18,7 @@ ns2 A {{ hostvars['na.code.dlang.io'].ansible_default_ipv4.address }}
     AAAA {{ hostvars['na.code.dlang.io'].ansible_default_ipv6.address }}
 ns3 A {{ hostvars['as.code.dlang.io'].ansible_default_ipv4.address }}
     AAAA {{ hostvars['as.code.dlang.io'].ansible_default_ipv6.address }}
+
 eu A {{ hostvars['eu.code.dlang.io'].ansible_default_ipv4.address }}
    AAAA {{ hostvars['eu.code.dlang.io'].ansible_default_ipv6.address }}
 na A {{ hostvars['na.code.dlang.io'].ansible_default_ipv4.address }}
@@ -25,4 +26,34 @@ na A {{ hostvars['na.code.dlang.io'].ansible_default_ipv4.address }}
 as A {{ hostvars['as.code.dlang.io'].ansible_default_ipv4.address }}
    AAAA {{ hostvars['as.code.dlang.io'].ansible_default_ipv6.address }}
 @ 10 DYNA geoip!dub_prod
+
+; debug tool
 reflect 10 DYNA reflect
+
+; restrict certificate authority
+@ CAA 128 issue "letsencrypt.org"
+ns1 CAA 128 issue "letsencrypt.org"
+ns2 CAA 128 issue "letsencrypt.org"
+ns3 CAA 128 issue "letsencrypt.org"
+eu CAA 128 issue "letsencrypt.org"
+na CAA 128 issue "letsencrypt.org"
+as CAA 128 issue "letsencrypt.org"
+* CAA 128 issue "letsencrypt.org"
+
+@ CAA 128 issuewild ";"
+ns1 CAA 128 issuewild ";"
+ns2 CAA 128 issuewild ";"
+ns3 CAA 128 issuewild ";"
+eu CAA 128 issuewild ";"
+na CAA 128 issuewild ";"
+as CAA 128 issuewild ";"
+* CAA 128 issuewild ";"
+
+@ CAA 0 iodef "mailto:webmaster@dawg.eu"
+ns1 CAA 0 iodef "mailto:webmaster@dawg.eu"
+ns2 CAA 0 iodef "mailto:webmaster@dawg.eu"
+ns3 CAA 0 iodef "mailto:webmaster@dawg.eu"
+eu CAA 0 iodef "mailto:webmaster@dawg.eu"
+na CAA 0 iodef "mailto:webmaster@dawg.eu"
+as CAA 0 iodef "mailto:webmaster@dawg.eu"
+* CAA 0 iodef "mailto:webmaster@dawg.eu"
