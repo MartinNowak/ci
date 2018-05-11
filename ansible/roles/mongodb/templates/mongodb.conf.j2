@@ -1,0 +1,19 @@
+# for documentation of all options, see:
+# https://docs.mongodb.org/manual/reference/configuration-options/
+
+storage:
+  dbPath: /var/lib/mongodb
+
+systemLog:
+  destination: syslog
+  syslogFacility: local0
+net:
+  bindIp: {{ mongodb_listen_host }}
+  port: {{ mongodb_listen_port }}
+
+{% if mongodb_replica != None %}
+replication:
+  replSetName: {{ mongodb_replica.set }}
+security:
+  keyFile: /etc/{{ mongodb_replica.keyfile }}
+{% endif %}

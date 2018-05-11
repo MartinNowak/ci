@@ -42,6 +42,11 @@ eu.code.dlang.io ansible_ssh_host=138.201.191.166
 na.code.dlang.io ansible_ssh_host=192.138.210.113
 as.code.dlang.io ansible_ssh_host=139.99.42.12
 
+[dub_mongodb_hosts]
+eu.code.dlang.io
+na.code.dlang.io
+as.code.dlang.io
+
 # all non-containerized host
 [servers:children]
 lxd_hosts

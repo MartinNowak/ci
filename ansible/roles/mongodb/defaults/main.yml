@@ -1,0 +1,14 @@
+---
+mongodb_listen_host: localhost
+mongodb_listen_port: 27017
+mongodb_root_password:
+mongodb_replica:
+  # set:
+  # keyfile: mongodb_rs0.key
+  # members:
+  #  - host: na.code.dlang.io
+  #    priority: 2
+  #  - host: 138.201.191.166
+  #    priority: 1
+  #  - host: 2402:1f00:8000:800::d52
+  #    priority: 1

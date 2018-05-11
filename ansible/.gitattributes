@@ -1,1 +1,2 @@
 vars/passwords.yml diff=ansible-vault
+files/mongodb_rs0.key diff=ansible-vault

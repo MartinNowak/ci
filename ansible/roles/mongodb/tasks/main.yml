@@ -1,0 +1,46 @@
+---
+- name: install mongodb
+  apt: { name: mongodb-server, install_recommends: no, update_cache: yes, cache_valid_time: 3600 }
+  register: installed
+
+- name: create admin user
+  mongodb_user:
+    database: admin
+    name: root
+    password: "{{ mongodb_root_password }}"
+    roles: root
+    state: present
+  when: installed.changed # only on first installation
+
+- name: install replica keyfile
+  copy:
+    src: "{{ mongodb_replica.keyfile }}"
+    dest: "/etc/{{ mongodb_replica.keyfile }}"
+    owner: mongodb
+    group: mongodb
+    mode: 0400
+  notify: restart mongodb
+  when: mongodb_replica != None
+
+- name: configure mongodb
+  template: { src: mongodb.conf.j2, dest: /etc/mongodb.conf }
+  notify: restart mongodb
+
+- meta: flush_handlers
+
+- name: open firewall to allow mongodb traffic
+  ufw: { rule: allow, src: "{{ item }}", port: "{{ mongodb_listen_port }}" , proto: tcp }
+  with_flattened: "{{ mongodb_firewall_addrs }}"
+
+- name: initiate replica
+  shell: >-
+    mongo admin --host {{ mongodb_replica.members[0].host }} --port {{ mongodb_listen_port }} -u root -p '{{ mongodb_root_password }}' --eval
+    'rs.initiate({
+      _id: "{{ mongodb_replica.set }}",
+      members: [
+      {% for m in mongodb_replica.members %}
+      { _id: {{ loop.index }}, host: "{{ m.host }}", priority: {{ m.priority }} },
+      {% endfor %}
+      ]
+    })'
+  run_once: yes

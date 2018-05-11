@@ -1,5 +1,7 @@
 ---
 - hosts: dub_hosts
+  vars_files:
+    - vars/passwords.yml # mongodb_root_password
   roles:
     - name: common
       tags: common
@@ -26,3 +28,21 @@
           backend: |
             mode http
             redirect prefix https://code.dlang.org
+
+    - name: mongodb
+      tags: mongodb
+      mongodb_listen_host: wireguard.{{ inventory_hostname }}
+      mongodb_firewall_addrs:
+        - "{{ groups.dub_mongodb_hosts | map('extract', hostvars) | map(attribute='private_host_net') | ipaddr('address') }}"
+        - "{{ groups.dub_mongodb_hosts | map('extract', hostvars) | map(attribute='private_host_net6') | ipaddr('address') }}"
+      mongodb_replica:
+        set: rs0
+        keyfile: mongodb_rs0.key
+        # TODO: use generic host group for MongoDB
+        members:
+          - host: wireguard.eu.code.dlang.io
+            priority: 1
+          - host: wireguard.na.code.dlang.io
+            priority: 2
+          - host: wireguard.as.code.dlang.io
+            priority: 1
