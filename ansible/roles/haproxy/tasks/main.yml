@@ -71,7 +71,7 @@
     block: |
       frontend https
               mode http
-              bind :::443 ssl {%- for d in https_domains %} crt /etc/ssl/private/{{ d.domain }}.pem{%- endfor %} alpn h2,http/1.1
+              bind :::443 ssl {%- for d in https_domains %} crt {{ d.domain }}.pem{%- endfor %} alpn h2,http/1.1
 
               http-request set-header X-Forwarded-Proto https
               http-response set-header Strict-Transport-Security max-age=31536000
