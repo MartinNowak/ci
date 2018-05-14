@@ -1,13 +1,28 @@
 ---
-- name: configure netplan
+- name: configure IP addresses
   copy:
-    dest: /etc/netplan/01-netcfg.yaml
+    dest: /etc/systemd/network/10-static.network
     content: |
-      network:
-        version: 2
-        renderer: networkd
-        ethernets:
-          {{ netplan_ethernets | indent(4) }}
-  when: ansible_distribution_major_version | int >= 18 and netplan_ethernets is defined
-  notify: netplan apply
+      [Match]
+      MACAddress={{ mac_addr }}
+
+      [Network]
+      Address={{ ipv4_net }}
+      {# assume link-local gateay if ip is not in a subnet #}
+      Address={{ ipv6_net }}
+
+      [Route]
+      Gateway={{ ipv4_gw | default(ipv4_net | ipaddr('1') | ipaddr('address')) }}
+      {% if ipv4_net | ipaddr('size') | int == 1 %}
+      GatewayOnlink=yes
+      {% endif %}
+
+      [Route]
+      Gateway={{ ipv6_gw | default(ipv6_net | ipaddr('1') | ipaddr('address')) }}
+  notify: restart systemd-networkd
+- name: enable systemd-networkd
+  systemd: { name: systemd-networkd, enabled: yes, state: started }
+- name: remove netplan.io
+  apt: { name: netplan.io, state: absent }
+
 - meta: flush_handlers

@@ -1,11 +1,6 @@
 ---
 coordinates: 1.3,103.9
-netplan_ethernets: |
-  ens3:
-    match:
-      macaddress: fa:16:3e:20:1e:3e
-    set-name: ens3
-    dhcp4: yes
-    addresses:
-      - 2402:1f00:8000:800::d52/64
-    gateway6: 2402:1f00:8000:800::1
+mac_addr: fa:16:3e:20:1e:3e
+ipv4_net: 139.99.42.12/32
+ipv4_gw: 139.99.40.1
+ipv6_net: 2402:1f00:8000:800::d52/64
