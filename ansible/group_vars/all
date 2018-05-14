@@ -6,5 +6,7 @@ host_ids:
   na.code.dlang.io: 4
   as.code.dlang.io: 5
 host_id: "{{ host_ids[inventory_hostname] }}"
-private_host_net: "10.23.{{ host_id | int }}.1/24"
+# private IPv4 and IPv6 subnets for VPN across hosts and containers
+private_host_net: "10.23.{{ host_id | int }}.1/24" # IPv4 private IP
+private_host_net6: "fd38:5fff:fc0d:{{ host_id | int }}::1/64" # IPv6-ULA
 backup_gpg_key: AFC7DB45693D62BB472BF27BAB8FE924C2F7E724

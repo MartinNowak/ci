@@ -1,0 +1,31 @@
+---
+- name: add wireguard ppa
+  apt_repository: { repo: 'ppa:wireguard/wireguard', update_cache: yes }
+- name: install wireguard
+  apt: { name: "{{ item }}", install_recommends: no, update_cache: yes, cache_valid_time: 3600 }
+  with_items: [wireguard-dkms, wireguard-tools]
+- name: generate privkey
+  shell: umask 377 && wg genkey > /etc/wireguard/privkey
+  check_mode: no
+  args:
+    creates: /etc/wireguard/privkey
+- name: get pubkey
+  shell: wg pubkey < /etc/wireguard/privkey
+  check_mode: no
+  changed_when: no
+  register: wg_pubkey
+- set_fact:
+    wg_pubkey: "{{ wg_pubkey.stdout }}"
+    wg_listen_port: "{{ 32768 | random(start=1024, seed=inventory_hostname) }}"
+- name: generate wg0 config
+  template: { src: wgN.conf.j2, dest: /etc/wireguard/wg0.conf, mode: 0400 }
+  notify: restart wg-quick@wg0
+- name: allow udp traffic on wireguard port
+  ufw: { rule: allow, port: "{{ wg_listen_port }}" , proto: udp, delete: yes }
+- name: allow udp traffic on wireguard port
+  ufw: { rule: allow, src: "{{ item }}", port: "{{ wg_listen_port }}" , proto: udp }
+  with_flattened:
+    - "{{ wireguard_hosts | map('extract', hostvars) | map(attribute='ansible_default_ipv4.address') | list }}"
+    - "{{ wireguard_hosts | map('extract', hostvars) | map(attribute='ansible_default_ipv6.address') | list }}"
+- name: enable wg-quick@wg0.service
+  systemd: { name: wg-quick@wg0.service, enabled: yes, state: started }

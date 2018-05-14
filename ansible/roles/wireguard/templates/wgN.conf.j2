@@ -1,0 +1,17 @@
+[Interface]
+Address = {{ private_host_net }}, {{ private_host_net6 }}
+ListenPort = {{ wg_listen_port }}
+PostUp = wg set %i private-key /etc/wireguard/privkey
+
+{% for host in wireguard_hosts %}
+{% if host != inventory_hostname %}
+[Peer] # {{ host }}
+PublicKey = {{ hostvars[host].wg_pubkey }}
+AllowedIPs = {{ hostvars[host].private_host_net }}, {{ hostvars[host].private_host_net6 }}
+# Only single endpoint with cached DNS resolution possible atm. Would
+# be nice to have IPv4 and IPv6 fallbacks.
+# https://lists.zx2c4.com/pipermail/wireguard/2018-March/002473.html
+Endpoint = {{ host }}:{{ hostvars[host].wg_listen_port }}
+
+{% endif %}
+{% endfor %}

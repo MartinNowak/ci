@@ -5,6 +5,7 @@
       tags: common
     - name: wireguard
       tags: wireguard
+      wireguard_hosts: "{{ groups.dub_hosts }}"
     - name: gdnsd
       tags: gdnsd
       plugins:
