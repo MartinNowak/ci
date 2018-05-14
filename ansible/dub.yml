@@ -1,7 +1,10 @@
 ---
 - hosts: dub_hosts
   roles:
-    - common
+    - name: common
+      tags: common
+    - name: wireguard
+      tags: wireguard
     - name: gdnsd
       tags: gdnsd
       plugins:
