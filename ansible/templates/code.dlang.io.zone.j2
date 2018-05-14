@@ -2,13 +2,14 @@ $ORIGIN code.dlang.io.
 $TTL 1800
 
 @       IN      SOA     ns1        webmaster.dawg.eu. (
-                        2018051002 ; serial
+                        2018051002 ; serial !!! UPDATE WITH EVERY CHANGE !!!
                         3600 ; refresh
                         900 ; retry
                         1209600 ; expire
                         1800 ; negative_ttl
                         )
 
+; responsible nameservers for code.dlang.io. domain
 @ NS ns1
 @ NS ns2
 @ NS ns3
@@ -25,6 +26,8 @@ na A {{ hostvars['na.code.dlang.io'].ansible_default_ipv4.address }}
    AAAA {{ hostvars['na.code.dlang.io'].ansible_default_ipv6.address }}
 as A {{ hostvars['as.code.dlang.io'].ansible_default_ipv4.address }}
    AAAA {{ hostvars['as.code.dlang.io'].ansible_default_ipv6.address }}
+
+; geo-dns resolution of code.dlang.io. (see code.dlang.io.geoip.j2 for plugin config)
 @ 10 DYNA geoip!dub_prod
 
 ; debug tool
@@ -58,6 +61,8 @@ na CAA 0 iodef "mailto:webmaster@dawg.eu"
 as CAA 0 iodef "mailto:webmaster@dawg.eu"
 * CAA 0 iodef "mailto:webmaster@dawg.eu"
 
+; SSHFP fingerprints for RSA+SHA256 and ED25519+SHA256
+; (also see https://github.com/gdnsd/gdnsd/issues/94 for RFC3597 syntax)
 eu TYPE44 \# 34 01 02 b2eb785ba5165024de544e3aac11ed16b709c0b111b1e8c6c38d760dd048ff03
 eu TYPE44 \# 34 04 02 242554c7713b463eeae583f00fc1bad3cb49811c8a9719577004a7eed5e6d39a
 na TYPE44 \# 34 01 02 c711292b72cce28a973228e1420a208d7251c668aff7f8ac95253638e566bfa8
