@@ -2,5 +2,9 @@
 ansible_become_pass: "{{ lookup('pipe', 'pass dlangci/sudo') }}"
 host_ids:
   ci.dlang.io: 2
+  eu.code.dlang.io: 3
+  na.code.dlang.io: 4
+  as.code.dlang.io: 5
 host_id: "{{ host_ids[inventory_hostname] }}"
+private_host_net: "10.23.{{ host_id | int }}.1/24"
 backup_gpg_key: AFC7DB45693D62BB472BF27BAB8FE924C2F7E724

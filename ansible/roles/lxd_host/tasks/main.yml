@@ -16,10 +16,10 @@
     UPDATE_PROFILE: 'true'
     LXD_CONFILE:
     LXD_DOMAIN: "{{ inventory_hostname_short }}.lxd"
-    LXD_IPV4_ADDR: "10.23.{{ host_id | int }}.1"
-    LXD_IPV4_NETMASK: 255.255.255.0
-    LXD_IPV4_NETWORK: "10.23.{{ host_id | int }}.1/24"
-    LXD_IPV4_DHCP_RANGE: "10.23.{{ host_id | int }}.2,10.23.{{ host_id | int }}.254"
+    LXD_IPV4_ADDR: "{{ private_host_net | ipaddr('address') }}"
+    LXD_IPV4_NETMASK: "{{ private_host_net | ipaddr('netmask') }}"
+    LXD_IPV4_NETWORK: "{{ private_host_net }}"
+    LXD_IPV4_DHCP_RANGE: "{{ private_host_net | ipaddr(2) | ipaddr('address') }},{{ private_host_net | ipaddr(254) | ipaddr('address') }}"
     LXD_IPV4_DHCP_MAX: 250
     LXD_IPV4_NAT: 'true'
     LXD_IPV6_ADDR:
