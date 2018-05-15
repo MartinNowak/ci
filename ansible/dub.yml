@@ -3,6 +3,7 @@
   roles:
     - name: common
       tags: common
+      disable_resolved_tcp_stub: yes
     - name: wireguard
       tags: wireguard
       wireguard_hosts: "{{ groups.dub_hosts }}"
@@ -12,6 +13,7 @@
         geoip: "{{ lookup('template', 'code.dlang.io.geoip.j2') }}"
       zones:
         code.dlang.io: "{{ lookup('template', 'code.dlang.io.zone.j2') }}"
+
     - name: haproxy
       tags: haproxy
       acme_servers: "{{ groups.dub_hosts | map('extract', hostvars) | map(attribute='ansible_default_ipv4.address') | list }}"

@@ -5,6 +5,8 @@
   service: { name: systemd-journald, state: restarted }
 - name: restart systemd-networkd
   service: { name: systemd-networkd, state: restarted }
+- name: restart systemd-resolved
+  service: { name: systemd-resolved, state: restarted }
 - name: restart sshd
   service: { name: sshd, state: restarted }
 - name: newaliases

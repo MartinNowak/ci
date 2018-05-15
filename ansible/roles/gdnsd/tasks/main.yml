@@ -6,6 +6,9 @@
   copy:
     dest: /etc/gdnsd/config
     content: |
+      options => {
+        listen => [ {{ ansible_default_ipv4.address }}, {{ ansible_default_ipv6.address }} ]
+      }
       service_types => {
         tcp443 => {
           plugin => tcp_connect,

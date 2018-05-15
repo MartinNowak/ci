@@ -1,13 +1,28 @@
 ---
 - name: uninstall resolvconf
   apt: { name: resolvconf, state: absent }
-- name: disable systemd-resolved
-  service: { name: systemd-resolved, enabled: no, state: stopped }
+- name: configure DNS servers
+  lineinfile:
+    dest: /etc/systemd/resolved.conf
+    regexp: '^#?DNS='
+    line: 'DNS=1.1.1.1 8.8.8.8 2606:4700:4700::1001'
+  when: disable_resolved_tcp_stub
+  notify: restart systemd-resolved
+# seems to work with systemd 238 though
+# (also see https://github.com/systemd/systemd/pull/4061)
+- name: disable conflicting systemd-resolved tcp stub listener
+  lineinfile:
+    dest: /etc/systemd/resolved.conf
+    regexp: '^#?DNSStubListener'
+    line: 'DNSStubListener=udp'
+  when: disable_resolved_tcp_stub
+  notify: restart systemd-resolved
+- name: enable systemd-resolved
+  service: { name: systemd-resolved, enabled: yes, state: started }
   when: ansible_distribution_major_version >= 17
-- name: configure resolv.conf
-  copy:
+- name: symlink resolv.conf
+  file:
+    src: /run/systemd/resolve/stub-resolv.conf
     dest: /etc/resolv.conf
-    content: |
-      nameserver 1.1.1.1
-      nameserver 8.8.8.8
-      nameserver 2606:4700:4700::1001
+    state: link
+    force: yes
