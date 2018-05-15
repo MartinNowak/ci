@@ -29,3 +29,14 @@
     - "{{ wireguard_hosts | map('extract', hostvars) | map(attribute='ansible_default_ipv6.address') | list }}"
 - name: enable wg-quick@wg0.service
   systemd: { name: wg-quick@wg0.service, enabled: yes, state: started }
+
+- name: add peers to /etc/hosts
+  lineinfile:
+    dest: /etc/hosts
+    line: "{{ hostvars[item].private_host_net | ipaddr('address') }} wireguard.{{ item }}"
+  with_items: "{{ wireguard_hosts }}"
+- name: add peers to /etc/hosts
+  lineinfile:
+    dest: /etc/hosts
+    line: "{{ hostvars[item].private_host_net6 | ipaddr('address') }} wireguard.{{ item }}"
+  with_items: "{{ wireguard_hosts }}"
