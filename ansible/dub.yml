@@ -11,12 +11,12 @@
     - name: haproxy
       tags: haproxy
       acme_servers: "{{ groups.dub_hosts | map('extract', hostvars) | map(attribute='ansible_default_ipv4.address') | list }}"
-      backends:
+      https_domains:
         - domain: "{{ inventory_hostname_short }}.code.dlang.io"
-          config: |
+          backend: |
             mode http
             redirect prefix https://code.dlang.org
         - domain: code.dlang.io
-          config: |
+          backend: |
             mode http
             redirect prefix https://code.dlang.org
