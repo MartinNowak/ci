@@ -1,62 +1,49 @@
 ---
-- name: install letsencrypt
-  apt: { name: letsencrypt }
+- name: add certbot ppa
+  apt_repository: { repo: 'ppa:certbot/certbot', update_cache: yes }
+- name: install certbot
+  apt: { name: certbot }
+- name: remove ubuntu letsencrypt package
+  apt: { name: letsencrypt, state: absent }
+- name: deploy script
+  copy:
+    dest: /root/letsencrypt_deploy.sh
+    mode: 0700
+    content: |
+      #!/usr/bin/env bash
+      set -ueo pipefail
+
+      cat "$RENEWED_LINEAGE/fullchain.pem" "$RENEWED_LINEAGE/privkey.pem" > "/etc/ssl/private/$(basename "$RENEWED_LINEAGE").pem"
+      {{ reload_cmd }}
 - name: configure letsencrypt cli
   lineinfile: { dest: /etc/letsencrypt/cli.ini, regexp: "{{ item.key }}", line: '{{ item.key }} = {{ item.value }}', create: yes }
   with_dict:
     rsa-key-size: 4096
     email: "{{ email }}"
     authenticator: standalone
-    # deprecated with 0.9.0
-    standalone-supported-challenges: http-01
     preferred-challenges: http
     http-01-port: "{{ http_challenge_port }}"
+    deploy-hook: /root/letsencrypt_deploy.sh
+- name: configure letsencrypt cli
+  lineinfile: { dest: /etc/letsencrypt/cli.ini, regexp: "{{ item }}", state: absent }
+  with_items:
+    - standalone-supported-challenges
+- name: ensure certbot.timer is enabled
+  systemd: { name: certbot.timer, state: started, enabled: yes }
 - name: stat certificates
   stat: { path: "/etc/letsencrypt/live/{{item}}" }
   register: cert_stats
   with_items: "{{ domains }}"
 - name: get initial certificate
-  command: letsencrypt certonly --standalone -d {{item.item}} --email {{email}} --non-interactive --agree-tos
+  command: certbot certonly --standalone -d {{item.item}} --email {{email}} --non-interactive --agree-tos
   with_items: "{{ cert_stats.results }}"
   serial: 1 # TODO: serial not available for roles
   when: not item.stat.exists
-- name: stat combined pem
-  stat: path=/etc/ssl/private/{{item}}.pem
-  register: cert_stats
-  with_items: "{{ domains }}"
-- name: combine certs and key
-  shell: cat /etc/letsencrypt/live/{{item.item}}/fullchain.pem /etc/letsencrypt/live/{{item.item}}/privkey.pem > /etc/ssl/private/{{item.item}}.pem
-  with_items: "{{ cert_stats.results }}"
-  when: not item.stat.exists
-- name: set file mode
-  file: dest=/etc/ssl/private/{{item}}.pem mode=0400
-  with_items: "{{ domains }}"
 
-- name: renewal script
-  copy:
-    dest: /root/letsencrypt_renew.sh
-    mode: 0700
-    content: |
-      #!/usr/bin/env bash
-      set -ueo pipefail
-
-      letsencrypt renew | logger -t letsencrypt_renew -p info
-      reload=0
-      for domain in $(ls /etc/letsencrypt/live/); do
-          if [ /etc/letsencrypt/live/$domain/fullchain.pem -nt /etc/ssl/private/$domain.pem ]; then
-            cat /etc/letsencrypt/live/"$domain"/fullchain.pem /etc/letsencrypt/live/"$domain"/privkey.pem > /etc/ssl/private/"$domain".pem
-            reload=1
-          fi
-      done
-      if [ $reload -eq 1 ]; then
-        {{ reload_cmd }}
-      fi
-- name: cron for renewal
+- name: remove renewal script
+  file: { dest: /root/letsencrypt_renew.sh, state: absent }
+- name: remove cron for renewal
   cron:
     name: letsencrypt
-    weekday: 1
-    hour: 9
-    minute: "{{ 60 | random(seed=inventory_hostname) }}"
     cron_file: letsencrypt_renew
-    user: root
-    job: /root/letsencrypt_renew.sh
+    state: absent
