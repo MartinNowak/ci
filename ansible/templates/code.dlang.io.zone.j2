@@ -2,7 +2,7 @@ $ORIGIN code.dlang.io.
 $TTL 1800
 
 @       IN      SOA     ns1        webmaster.dawg.eu. (
-                        2018051002 ; serial !!! UPDATE WITH EVERY CHANGE !!!
+                        2018080801 ; serial !!! UPDATE WITH EVERY CHANGE !!!
                         3600 ; refresh
                         900 ; retry
                         1209600 ; expire
@@ -28,7 +28,7 @@ as A {{ hostvars['as.code.dlang.io'].ansible_default_ipv4.address }}
    AAAA {{ hostvars['as.code.dlang.io'].ansible_default_ipv6.address }}
 
 ; geo-dns resolution of code.dlang.io. (see code.dlang.io.geoip.j2 for plugin config)
-@ 10 DYNA geoip!dub_prod
+@ 600/600 DYNA geoip!dub_prod
 
 ; debug tool
 reflect 10 DYNA reflect

@@ -1,4 +1,5 @@
 ---
 - name: restart gdnsd
   service: { name: gdnsd, state: restarted }
-
+- name: gdnsd reload-zones
+  command: gdnsd reload-zones

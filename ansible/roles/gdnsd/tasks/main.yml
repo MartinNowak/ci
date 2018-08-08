@@ -33,6 +33,7 @@
     dest: "/etc/gdnsd/zones/{{ item.key }}"
     content: "{{ item.value }}"
   with_dict: "{{ zones }}"
+  notify: gdnsd reload-zones
 - name: enable gdnsd
   service: { name: gdnsd, enabled: yes }
 - name: allow dns traffic
