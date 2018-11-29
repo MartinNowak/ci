@@ -24,6 +24,13 @@
     owner: buildkite-agent
     mode: 0700
   when: allowed_pipelines != None
+- name: add empty checkout hook
+  copy:
+    src: empty-checkout.sh
+    dest: /etc/buildkite-agent/hooks/checkout
+    owner: buildkite-agent
+    mode: 0700
+  when: skip_checkout
 - name: create systemd service drop-in
   file:
     dest: /etc/systemd/system/buildkite-agent.service.d

@@ -5,3 +5,4 @@ stop_timeout: 5min # systemd TimeoutStopSec for graceful agent shutdown
 num_agents: 1
 agent_tags: '"queue=default,memory=high"'
 allowed_pipelines:
+skip_checkout: False

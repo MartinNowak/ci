@@ -88,6 +88,7 @@
       tags: buildkite_agent
       priority: 2
       num_agents: 8 # for CX51 server
+      skip_checkout: True
       agent_tags: '"queue=default,memory=high"'
 
 - hosts: localhost

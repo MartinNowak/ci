@@ -66,6 +66,7 @@
   roles:
     - role: buildkite_agent
       priority: 1 # Decrese priority of permanent agents
+      skip_checkout: True
       tags: buildkite_agent
 
 - hosts: ci.dlang.io
