@@ -10,7 +10,7 @@ N=2
 MODEL=64
 PIC=1
 
-"$DIR/clone_repositories.sh"
+"$DIR/clone_dlang.sh"
 
 origin_repo="$(echo "$BUILDKITE_REPO" | sed "s/.*\/\([^\]*\)[.]git/\1/")"
 cd "$origin_repo"

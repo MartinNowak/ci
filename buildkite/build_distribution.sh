@@ -7,8 +7,7 @@ set -uexo pipefail
 echo "--- Setting build variables"
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-"$DIR/clone_repositories.sh"
+cd dlang
 
 echo "--- Building all core repositories"
 for dir in dmd druntime phobos ; do

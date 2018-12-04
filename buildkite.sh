@@ -1,20 +1,5 @@
 #!/bin/bash
 
-read -r -d '' LOAD_CI_FOLDER <<- EOM
-        # just to be sure there isn't anything old left
-        git clean -ffdxq .
-        echo "--- Load CI folder"
-        # make sure the entire CI folder is loaded
-        if [ ! -d buildkite ] ; then
-           mkdir -p buildkite && pushd buildkite
-           wget https://github.com/dlang/ci/archive/master.tar.gz
-           tar xvfz master.tar.gz --strip-components=2 ci-master/buildkite
-           rm -rf master.tar.gz && popd
-        fi
-        echo "--- Merging with the upstream target branch"
-        ./buildkite/merge_head.sh
-EOM
-
 read -r -d '' LOAD_DISTRIBUTION <<- EOM
         echo "--- Load distribution archive"
         buildkite-agent artifact download distribution.tar.xz .
@@ -22,6 +7,7 @@ read -r -d '' LOAD_DISTRIBUTION <<- EOM
         rm -rf buildkite
         mv distribution/buildkite buildkite
         rm distribution.tar.xz
+        source ./buildkite/load_distribution.sh
 EOM
 
 read -r -d '' DEFAULT_COMMAND_PROPS <<- EOM
@@ -43,7 +29,11 @@ steps:
         ld -v
         ! command -v gdb &>/dev/null || gdb --version
         ! dmd --version # ensure that no dmd is the current environment
-        ${LOAD_CI_FOLDER}
+        # just to be sure there isn't anything old left
+        rm -rf .
+        echo "--- Cloning dlang core repos"
+        ./buildkite/clone_dlang.sh
+        echo "--- Building distribution"
         ./buildkite/build_distribution.sh
     label: "Build"
     artifact_paths: "distribution.tar.xz"
@@ -70,9 +60,8 @@ case "${BUILDKITE_REPO:-x}" in
 cat << EOF
   - command: |
         ${LOAD_DISTRIBUTION}
-        . ./buildkite/load_distribution.sh
-        echo "--- Merging with the upstream target branch"
-        ./buildkite/merge_head.sh
+        echo "--- Cloning dlang core repos"
+        ./buildkite/clone_dlang.sh
         echo "--- Running style testing"
         ./buildkite/style.sh
     label: "Style"
@@ -80,9 +69,8 @@ cat << EOF
 
   - command: |
         ${LOAD_DISTRIBUTION}
-        . ./buildkite/load_distribution.sh
-        echo "--- Merging with the upstream target branch"
-        ./buildkite/merge_head.sh
+        echo "--- Cloning dlang core repos"
+        ./buildkite/clone_dlang.sh
         echo "--- Running coverage testing"
         ./buildkite/test_coverage.sh
     label: "Coverage"
@@ -194,13 +182,9 @@ for project_name in "${projects[@]}" ; do
 cat << EOF
   - command: |
         # just to be sure there isn't anything old left
-        git clean -ffdxq .
-
-        # don't build everything from the root folder
-        mkdir build && cd build
+        rm -rf .
 
         export REPO_URL="https://github.com/${project}"
-        export REPO_DIR="$(echo "${project_name}" | tr '/' '-')"
         export REPO_FULL_NAME="${project_name}"
 
         ${LOAD_DISTRIBUTION}

@@ -5,8 +5,6 @@ set -uexo pipefail
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-. "$DIR/load_distribution.sh"
-
 # set environment configs and allow build_project to be conveniently used in standalone
 if [ -z "$REPO_FULL_NAME" ] ; then
     echo 'ERROR: You must set $REPO_FULL_NAME'
@@ -15,10 +13,6 @@ fi
 if [ -z "${REPO_URL:-}" ] ; then
     REPO_URL="https://github.com/$REPO_FULL_NAME"
     echo "WARNING: \$REPO_URL not set. Falling back to $REPO_URL"
-fi
-if [ -z "${REPO_DIR:-}" ] ; then
-    REPO_DIR="$(basename $REPO_FULL_NAME)"
-    echo "WARNING: \$REPO_DIR not set. Falling back to $REPO_DIR"
 fi
 
 # clone the latest tag
@@ -41,8 +35,6 @@ case "$REPO_URL" in
         ;;
 esac
 
-echo "--- Checking ${REPO_FULL_NAME} for a core repository and branch merging with ${BUILDKITE_REPO}"
-
 # Don't checkout a tagged version of the core repositories like Phobos
 case "$REPO_FULL_NAME" in
     "dlang/dmd" | \
@@ -51,24 +43,14 @@ case "$REPO_FULL_NAME" in
     "dlang/tools" | \
     "dlang/dub" | \
     "dlang/ci")
-        # if the core repo is the current repo, then just merge its head
-        if [[ "${BUILDKITE_REPO:-b}" =~ ^${REPO_URL:-a}([.]git)?$ ]] ; then
-            echo "--- Merging with the upstream target branch"
-            "$DIR/merge_head.sh"
-            latest_tag="IS-ALREADY-CHECKED-OUT"
-        else
-            # otherwise checkout the respective branch
-            latest_tag=$("$DIR/origin_target_branch.sh" "${REPO_URL}")
-        fi
+        "$DIR"/clone_dlang.sh "${REPO_FULL_NAME#dlang/}"
         ;;
     *)
+        echo "--- Cloning $REPO_URL (tag: $latest_tag)"
+        git clone -b "$latest_tag" --depth 1 "$REPO_URL" "$REPO_FULL_NAME"
+        ;;
 esac
-
-if [ "$latest_tag" != "IS-ALREADY-CHECKED-OUT" ] ; then
-    echo "--- Cloning ${REPO_URL} (tag: $latest_tag)"
-    git clone -b "${latest_tag}" --depth 1 "${REPO_URL}" "${REPO_DIR}"
-    cd "${REPO_DIR}"
-fi
+cd "$REPO_FULL_NAME"
 
 use_travis_test_script()
 {
@@ -244,20 +226,20 @@ case "$REPO_FULL_NAME" in
     dlang/dmd | \
     dlang/druntime | \
     dlang/phobos)
-        "$DIR"/clone_repositories.sh
+        "$DIR"/clone_dlang.sh
         # To avoid running into "Path too long" issues, see e.g. https://github.com/dlang/ci/pull/287
         export TMP="/tmp/${BUILDKITE_AGENT_NAME}"
         export TEMP="$TMP"
         export TMPDIR="$TMP"
         rm -rf "$TMP" && mkdir -p "$TMP"
         # patch makefile which requires gdb 8 - see https://github.com/dlang/ci/pull/301
-        sed "s/TESTS+=rt_trap_exceptions_drt_gdb//" -i druntime/test/exceptions/Makefile
+        sed "s/TESTS+=rt_trap_exceptions_drt_gdb//" -i dlang/druntime/test/exceptions/Makefile
         # build druntime for phobos first, s.t. it doesn't fault when copying the druntime files in parallel
         # see https://github.com/dlang/ci/pull/340
         if [ "$REPO_FULL_NAME" == "dlang/phobos" ] ; then
-            make -C druntime -j2 -f posix.mak
+            make -C dlang/druntime -j2 -f posix.mak
         fi
-        cd "$(basename "${REPO_FULL_NAME}")"&& make -f posix.mak clean && make -f posix.mak -j2 buildkite-test
+        make -C "${REPO_FULL_NAME}" -f posix.mak clean && make -C "${REPO_FULL_NAME}" -f posix.mak -j2 buildkite-test
         rm -rf "$TMP"
         ;;
 
